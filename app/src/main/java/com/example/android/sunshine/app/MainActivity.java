@@ -147,12 +147,12 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
-        } else if(id == R.id.syncWear) {
-            // TODO remove
-            SunshineWearSyncHelper helper = new SunshineWearSyncHelper();
-            Random rnd = new Random();
-            helper.updateWear(this, rnd.nextInt(100), rnd.nextInt(100), R.drawable.art_fog);
         }
+//        else if(id == R.id.syncWear) {
+//            SunshineWearSyncHelper helper = new SunshineWearSyncHelper();
+//            Random rnd = new Random();
+//            helper.updateWear(this, rnd.nextInt(100), rnd.nextInt(100), R.drawable.art_fog);
+//        }
         return super.onOptionsItemSelected(item);
     }
 

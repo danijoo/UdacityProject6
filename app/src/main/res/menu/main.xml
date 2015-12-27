@@ -21,9 +21,9 @@
         android:title="@string/action_settings"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item android:id="@+id/syncWear"
-        android:title="Sync wear"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        />
+    <!--<item android:id="@+id/syncWear"-->
+        <!--android:title="Sync wear"-->
+        <!--android:orderInCategory="100"-->
+        <!--app:showAsAction="never"-->
+        <!--/>-->
 </menu>
