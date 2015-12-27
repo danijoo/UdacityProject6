@@ -122,12 +122,12 @@ public class WatchFaceDrawHelper {
         canvas.drawText(dateText, mDateXOffset, mDateYOffset, mDateTextPaint);
 
         // Draw weather
-//        if(!(highestTemp == 0 && lowestTemp == 0)) {
+        if(!(highestTemp == 0 && lowestTemp == 0)) {
             String currentHigh = String.format(TEMP_FORMAT, highestTemp);
             canvas.drawText(currentHigh, mTempHighXOffset, mTempYOffset, mHighestTempPaint);
             String currentLow = String.format(TEMP_FORMAT, lowestTemp);
             canvas.drawText(currentLow, mTempLowXOffset, mTempYOffset, mLowestTempPaint);
-//        }
+        }
 
         if(weatherIcon != null)
             canvas.drawBitmap(weatherIcon, mWeatherIconXOffset, mWeatherIconYOffset, mIconPaint);
