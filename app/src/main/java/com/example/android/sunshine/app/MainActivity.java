@@ -36,11 +36,13 @@ import android.view.View;
 
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.example.android.sunshine.app.sync.SunshineWearSyncHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements ForecastFragment.Callback {
 
@@ -145,6 +147,11 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if(id == R.id.syncWear) {
+            // TODO remove
+            SunshineWearSyncHelper helper = new SunshineWearSyncHelper();
+            Random rnd = new Random();
+            helper.updateWear(this, rnd.nextInt(100), rnd.nextInt(100), R.drawable.art_fog);
         }
         return super.onOptionsItemSelected(item);
     }

@@ -18,7 +18,7 @@ android {
         }
     }
     buildTypes.each {
-        it.buildConfigField 'String', 'OPEN_WEATHER_MAP_API_KEY', '""'
+        it.buildConfigField 'String', 'OPEN_WEATHER_MAP_API_KEY', '"f230a5958a6234052143e3983e295d58"'
     }
 }
 
@@ -33,4 +33,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.1'
     compile 'com.google.android.gms:play-services-gcm:7.8.0'
     compile 'com.google.android.apps.muzei:muzei-api:2.0'
+    compile 'com.google.android.gms:play-services-wearable:7.8.0'
 }

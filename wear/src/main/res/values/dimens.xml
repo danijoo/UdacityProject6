@@ -16,12 +16,17 @@
     <dimen name="weather_text_size_round">25dp</dimen>
     <dimen name="weather_text_size_2">15dp</dimen>
     <dimen name="weather_text_size_round_2">20dp</dimen>
-    <dimen name="weather_x_offset">45dp</dimen>
-    <dimen name="weather_x_offset_round">55dp</dimen>
-    <dimen name="weather_x_offset_2">70dp</dimen>
-    <dimen name="weather_x_offset_round_2">100dp</dimen>
-    <dimen name="weather_y_offset">140dp</dimen>
 
-    <dimen name="weather_indicator_size">40dp</dimen>
+    <dimen name="weather_icon_x_offset">15dp</dimen>
+    <dimen name="weather_icon_x_offset_round">55dp</dimen>
+    <dimen name="weather_icon_y_offset">120dp</dimen>
+
+    <dimen name="temp_high_x_offset">70dp</dimen>
+    <dimen name="temp_high_x_offset_round">100dp</dimen>
+    <dimen name="temp_low_x_offset">125dp</dimen>
+    <dimen name="temp_low_x_offset_round">140dp</dimen>
+    <dimen name="temp_y_offset">140dp</dimen>
+
+
 
 </resources>

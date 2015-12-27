@@ -21,17 +21,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.Asset;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
+import com.google.android.gms.wearable.Wearable;
+
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -78,13 +96,16 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
         }
     }
 
-    private class SunshineWatchFaceEngine extends CanvasWatchFaceService.Engine {
+    private class SunshineWatchFaceEngine extends CanvasWatchFaceService.Engine implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         WatchFaceDrawHelper mDrawerHelper;
         boolean mRegisteredTimeZoneReceiver = false;
 
         boolean mAmbient;
         Time mTime;
+        int tempHigh, tempLow;
+        Bitmap weatherIcon;
+
         final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -99,6 +120,8 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
          */
         boolean mLowBitAmbient;
 
+        GoogleApiClient mApiClient;
+
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
@@ -111,6 +134,13 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
                     .build());
 
             mTime = new Time();
+
+            mApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            mApiClient.connect();
         }
 
         @Override
@@ -192,11 +222,10 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
         }
 
 
-
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
-            mDrawerHelper.draw(canvas, bounds, mTime, 25, 16);
+            mDrawerHelper.draw(canvas, bounds, mTime, tempHigh, tempLow, weatherIcon);
         }
 
         /**
@@ -228,6 +257,63 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
                 long delayMs = INTERACTIVE_UPDATE_RATE_MS
                         - (timeMs % INTERACTIVE_UPDATE_RATE_MS);
                 mUpdateTimeHandler.sendEmptyMessageDelayed(MSG_UPDATE_TIME, delayMs);
+            }
+        }
+
+        @Override
+        public void onConnected(Bundle bundle) {
+            Log.d("SunshineWatchFaceSync", "connected");
+            Wearable.DataApi.addListener(mApiClient, this);
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+            Log.d("SunshineWatchFaceSync", "connection suspended: " + i);
+        }
+
+        @Override
+        public void onConnectionFailed(ConnectionResult connectionResult) {
+            Log.d("SunshineWatchFaceSync",
+                    "connection failed: " + connectionResult.toString());
+        }
+
+        public static final String KEY_HIGHEST_TEMP = "highestTemp";
+        public static final String KEY_LOWEST_TEMP = "lowestTemp";
+        public static final String KEY_WEATHER_ICON = "weatherIcon";
+
+        @Override
+        public void onDataChanged(DataEventBuffer dataEvents) {
+            Log.d("SunshineWatchFaceSync", "data changed");
+            for (DataEvent event : dataEvents) {
+                if (event.getType() == DataEvent.TYPE_CHANGED) {
+                    // DataItem changed
+                    DataItem item = event.getDataItem();
+                    if (item.getUri().getPath().compareTo("/dailyTemp") == 0) {
+                        DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                        tempHigh = dataMap.getInt(KEY_HIGHEST_TEMP);
+                        tempLow = dataMap.getInt(KEY_LOWEST_TEMP);
+
+
+                        GoogleApiClient client = mApiClient;
+                        Asset asset = dataMap.getAsset(KEY_WEATHER_ICON);
+
+                        PendingResult<DataApi.GetFdForAssetResult> pendingResult = Wearable.DataApi.getFdForAsset(client, asset);
+                        pendingResult.setResultCallback(new ResultCallback<DataApi.GetFdForAssetResult>() {
+                            @Override
+                            public void onResult(DataApi.GetFdForAssetResult assetResult) {
+                                BitmapFactory.Options options = new BitmapFactory.Options();
+                                options.inSampleSize = 6; // TODO calculate this
+                                InputStream assetInputStream = assetResult.getInputStream();
+                                weatherIcon = BitmapFactory.decodeStream(assetInputStream, null, options);
+                            }
+                        });
+
+
+                        Log.d("SunshineWatchFaceSync", "new dataitem: highest: " + tempHigh + " lowest: " + tempLow);
+                    }
+                } else if (event.getType() == DataEvent.TYPE_DELETED) {
+                    Log.d("SunshineWatchFaceSync", "dailyTemp deleted");
+                }
             }
         }
     }
